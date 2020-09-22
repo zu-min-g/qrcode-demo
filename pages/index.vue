@@ -67,9 +67,9 @@
         </b-container>
         <b-container>
             <b-row>
-                <p>
+                <b-col>
                     <small class="text-muted">{{ $t("trademark") }}</small>
-                </p>
+                </b-col>
             </b-row>
         </b-container>
     </div>
