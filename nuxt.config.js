@@ -6,6 +6,9 @@ export default {
     generate: {
         dir: 'docs',
     },
+    router: {
+        base: '/qrcode-demo/',
+    },
     components: true,
     buildModules: ['@nuxt/typescript-build'],
     target: 'static',
