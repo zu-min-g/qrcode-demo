@@ -73,13 +73,6 @@
   * 
  */
 
-/**
- * QR コード生成ライブラリ
- *
- * @author   zu-min-g <https://github.com/zu-min-g>
- * @license  MIT
- */
-
 /**!
  * @fileOverview Kickass library to create and place poppers near their reference elements.
  * @version 1.16.1

@@ -18,7 +18,7 @@ export default {
     components: true,
     buildModules: ['@nuxt/typescript-build'],
     target: 'static',
-    mode: "spa",
+    ssr: false,
     modern: 'client',
     i18n: {
         locales: [
@@ -42,5 +42,9 @@ export default {
         },
         lazy: true,
         langDir: 'lang/',
+    },
+
+    server: {
+        host: '0.0.0.0',
     }
 }

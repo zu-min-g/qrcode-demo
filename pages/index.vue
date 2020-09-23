@@ -60,8 +60,10 @@
                 </b-col>
                 <b-col md="6" class="text-center">
                     <p><QrCanvas :data="dataStr" v-model="qrcode" :qrOptions="qrOptions" :canvasOptions="canvasOptions" class="qr" /></p>
-                    <p><a :href="dataUri" class="btn btn-primary" download="qr.png">{{ $t("download") }}</a></p>
-                    <p><b-textarea class="text-muted" v-model="dataUri"></b-textarea></p>
+                    <div v-if="qrcode.supportBlob">
+                        <p><a :href="dataUri" class="btn btn-primary" download="qr.png">{{ $t("download") }}</a></p>
+                        <p><b-textarea class="text-muted" v-model="dataUri"></b-textarea></p>
+                    </div>
                 </b-col>
             </b-row>
         </b-container>
@@ -88,7 +90,7 @@ export default Vue.extend({
             });
         }
 
-        return {
+        const data = {
             mode: 'text',
             modes: [
                 { text: this.$t("mode.text"), value: 'text' },
@@ -141,9 +143,8 @@ export default Vue.extend({
                 foreground: '#000000',
                 background: '#ffffff',
             },
-            encoding: 'utf8',
+            encoding: 'shiftjis',
             encodings: [
-                { value: 'utf8', text: 'UTF-8' },
                 { value: 'shiftjis', text: 'Shift_JIS' },
             ],
             masking: -1,
@@ -163,10 +164,19 @@ export default Vue.extend({
             transparent: false,
             debug: false,
             qrcode: {
-                drawer: {}
+                drawer: {},
+                canvas: {},
+                supportBlob: false,
             },
             dataUri: "",
+            blobUri: "",
         }
+
+        if (typeof TextEncoder !== "undefined") {
+            data.encoding = "utf8"
+            data.encodings.unshift({ value: 'utf8', text: 'UTF-8' })
+        }
+        return data
     },
     computed: {
         dataStr (): string {
@@ -213,6 +223,21 @@ export default Vue.extend({
                 return
             }
             const drawer = this.qrcode.drawer as CanvasDrawer
+
+            if (!this.qrcode.supportBlob) {
+                return
+            }
+            const canvas = this.qrcode.canvas as HTMLCanvasElement
+            canvas.toBlob((blob) => {
+                if (blob === null) {
+                    return
+                }
+                if (this.blobUri) {
+                    URL.revokeObjectURL(this.blobUri)
+                }
+                this.blobUri = URL.createObjectURL(blob)
+            })
+
             drawer.toDataUri().then((uri) => {
                 if (uri === null) {
                     return

@@ -37,11 +37,14 @@ export default Vue.extend({
         generate () {
             this.error = ''
             try {
-                var qrcode = qr.generate(this.data, this.qrOptions)
-                var drawer = qrcode.drawToCanvas(this.$refs.canvas as HTMLCanvasElement, this.canvasOptions)
+                const qrcode = qr.generate(this.data, this.qrOptions)
+                const canvas = this.$refs.canvas as HTMLCanvasElement
+                const drawer = qrcode.drawToCanvas(canvas, this.canvasOptions)
                 this.$emit("input", {
                     qrcode,
                     drawer,
+                    canvas,
+                    supportBlob: typeof canvas.toBlob !== "undefined"
                 })
             } catch (e) {
                 console.log(e)
@@ -51,3 +54,9 @@ export default Vue.extend({
     }
 })
 </script>
+
+<style scoped>
+canvas {
+    image-rendering: crisp-edges;
+}
+</style>
