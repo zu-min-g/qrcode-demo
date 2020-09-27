@@ -1,7 +1,7 @@
 <template>
     <div>
-        <b-container class="mb-4">
-            <h1>{{ $t("title") }}</h1>
+        <b-container class="mb-4 mt-2">
+            <h1><a href="https://github.com/zu-min-g/qrcode">{{ $t("title") }}</a> — {{ $t("subTitle") }}</h1>
         </b-container>
         <b-container class="mb-4">
             <nuxt-link :to="switchLocalePath('en')">English</nuxt-link> / 
@@ -46,6 +46,16 @@
                         <b-form-group>
                             <b-row>
                                 <b-col sm="3">
+                                    <label class="col-form-label">{{ $t("options.output") }}</label>
+                                </b-col>
+                                <b-col sm="9">
+                                    <b-form-radio-group v-model="output" name="output" value="text" :options="outputs"></b-form-radio-group>
+                                </b-col>
+                            </b-row>
+                        </b-form-group>
+                        <b-form-group>
+                            <b-row>
+                                <b-col sm="3">
                                     <label class="col-form-label">{{ $t("options.options") }}</label>
                                 </b-col>
                                 <b-col sm="9">
@@ -59,10 +69,16 @@
                     </b-container>
                 </b-col>
                 <b-col md="6" class="text-center">
-                    <p><QrCanvas :data="dataStr" v-model="qrcode" :qrOptions="qrOptions" :canvasOptions="canvasOptions" class="qr" /></p>
-                    <div v-if="qrcode.supportBlob">
-                        <p><a :href="dataUri" class="btn btn-primary" download="qr.png">{{ $t("download") }}</a></p>
-                        <p><b-textarea class="text-muted" v-model="dataUri"></b-textarea></p>
+                    <div v-if="output == 'canvas'">
+                        <p><QrCanvas :data="dataStr" v-model="qrcode" :qrOptions="qrOptions" :canvasOptions="canvasOptions" class="qr" /></p>
+                        <div v-if="qrcode.supportBlob">
+                            <p><a :href="dataUri" class="btn btn-primary" download="qr.png">{{ $t("download") }}</a></p>
+                            <p><b-textarea class="text-muted" v-model="dataUri"></b-textarea></p>
+                        </div>
+                    </div>
+                    <div v-if="output == 'svg'">
+                        <p><QrSvg :data="dataStr" v-model="qrcodeSvg" :qrOptions="qrOptions" :svgOptions="svgOptions" class="qr" /></p>
+                        <p v-if="!isIe"><a :href="dataUriSvg" class="btn btn-primary" download="qr.svg">{{ $t("download") }}</a></p>
                     </div>
                 </b-col>
             </b-row>
@@ -78,7 +94,7 @@
 </template>
 
 <script lang="ts">
-import { QROptions, CanvasOptions, TYPE_MAX, TYPE_MIN, EccLevel, CanvasDrawer } from '@zu-min/qrcode'
+import { QROptions, CanvasOptions, TYPE_MAX, TYPE_MIN, EccLevel, CanvasDrawer, SvgOptions, SvgDrawer } from '@zu-min/qrcode'
 import type { Mask } from '@zu-min/qrcode'
 import Vue from 'vue'
 export default Vue.extend({
@@ -91,6 +107,7 @@ export default Vue.extend({
         }
 
         const data = {
+            isIe: window.navigator.userAgent.toLowerCase().indexOf('trident') !== -1,
             mode: 'text',
             modes: [
                 { text: this.$t("mode.text"), value: 'text' },
@@ -143,8 +160,9 @@ export default Vue.extend({
                 foreground: '#000000',
                 background: '#ffffff',
             },
-            encoding: 'shiftjis',
+            encoding: 'utf8',
             encodings: [
+                { value: 'utf8', text: 'UTF-8' },
                 { value: 'shiftjis', text: 'Shift_JIS' },
             ],
             masking: -1,
@@ -159,6 +177,11 @@ export default Vue.extend({
                 { value: 6, text: '6' },
                 { value: 7, text: '7' },
             ],
+            output: "canvas",
+            outputs: [
+                { value: "canvas", text: "Canvas" },
+                { value: "svg", text: "SVG" },
+            ],
             flipHorizontal: false,
             useEci: false,
             transparent: false,
@@ -168,13 +191,14 @@ export default Vue.extend({
                 canvas: {},
                 supportBlob: false,
             },
+            qrcodeSvg: {
+                drawer: {},
+                svg: {},
+            },
             dataUri: "",
             blobUri: "",
-        }
-
-        if (typeof TextEncoder !== "undefined") {
-            data.encoding = "utf8"
-            data.encodings.unshift({ value: 'utf8', text: 'UTF-8' })
+            dataUriSvg: "",
+            svgBlob: {},
         }
         return data
     },
@@ -216,6 +240,15 @@ export default Vue.extend({
                 transparent: this.transparent,
             }
         },
+        svgOptions (): SvgOptions {
+            return {
+                thickness: parseInt(this.thickness as string),
+                color: this.color.foreground,
+                backgroundColor: this.color.background,
+                flipHorizontal: this.flipHorizontal,
+                transparent: this.transparent,
+            }
+        },
     },
     watch: {
         "qrcode" () {
@@ -244,15 +277,25 @@ export default Vue.extend({
                 }
                 this.dataUri = uri
             })
-        }
+        },
+        "qrcodeSvg" () {
+            if (!this.qrcodeSvg.drawer) {
+                return
+            }
+            const drawer = this.qrcodeSvg.drawer as SvgDrawer
+
+            this.svgBlob = drawer.toBlob()
+            if (this.dataUriSvg) {
+                URL.revokeObjectURL(this.dataUriSvg)
+            }
+            this.dataUriSvg = URL.createObjectURL(this.svgBlob)
+        },
     }
 })
 </script>
 
 <style>
-.qr canvas {
-    border:1px dashed #c0c0c0;
-    
+.qr canvas, .qr svg {
     background:
         linear-gradient(45deg, rgba(0, 0, 0, 0.08) 25%, transparent 0),
         linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.08) 0),

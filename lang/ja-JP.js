@@ -1,5 +1,6 @@
 export default {
-    title: 'qrcode.js — QR コード生成',
+    title: 'qrcode.js',
+    subTitle: 'QR コード生成',
     examples: `qrcode.js のサンプルです。
 符号化方式は以下をサポートしています。
 * 数字
@@ -40,6 +41,7 @@ export default {
         reverse: "明暗反転",
         encoding: "文字コード",
         mask: "マスク関数",
+        output: "出力",
         options: "オプション",
         flipHorizontal: "表裏（左右）反転",
         useEciHeader: "ECI ヘッダを使用",

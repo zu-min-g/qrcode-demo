@@ -1,5 +1,6 @@
 export default {
-    title: 'qrcode.js — A QR Code Generator.',
+    title: 'qrcode.js',
+    subTitle: 'A QR Code Generator.',
     examples: `Examples of qrcode.js.
 It supports the following encodings.
 * Number
@@ -27,19 +28,20 @@ It supports the following encodings.
     noteFunctionsForLegacy: "For legacy mobile phone in Japan.",
     options: {
         type: "Type",
-        autoExpandsType: "It automatically expands according to the size of the data.",
+        autoExpandsType: "It automatically expands according to size of the data.",
         eccLevel: "ECC Level",
         levelLow: "Low",
         levelHigh: "High",
         division: "Divide into",
         divisionOne: "1",
-        noteDivisions: "Depending on the amount of data, it may be less than the specified number of divisions. It can only be read by an app that supports Articulated QR reading.",
+        noteDivisions: "Depending on the amount of data, it may be less than the specified number of divisions. It can only be read by apps that supports reading Articulated QR.",
         thickness: "Thickness",
         foreground: "Foreground",
         background: "Background",
         reverse: "Reverse",
         encoding: "Encoding",
         mask: "Mask func.",
+        output: "Output",
         options: "Options",
         flipHorizontal: "Flip horizontal",
         useEciHeader: "Use ECI header",
